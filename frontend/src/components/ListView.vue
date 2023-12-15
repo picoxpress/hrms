@@ -348,18 +348,18 @@ watch(
 	}
 )
 
+socket.emit("doctype_subscribe", props.doctype)
+socket.on("list_update", (data) => {
+	if (data?.doctype !== props.doctype) return
+	fetchDocumentList()
+})
+
 onMounted(async () => {
 	const workflow = useWorkflow(props.doctype)
 	await workflow.workflowDoc.promise
 	workflowStateField.value = workflow.getWorkflowStateField()
 
 	fetchDocumentList()
-
-	socket.emit("doctype_subscribe", props.doctype)
-	socket.on("list_update", (data) => {
-		if (data?.doctype !== props.doctype) return
-		fetchDocumentList()
-	})
 })
 
 onBeforeUnmount(() => {
