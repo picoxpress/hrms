@@ -7,8 +7,11 @@ def execute():
 
 	(
 		frappe.qb.update(sd)
-		.inner_join(ss)
-		.on(ss.name == sd.parent)
-		.set(sd.docstatus, 1)
-		.where((ss.docstatus == 1) & (sd.parenttype == "Salary Structure"))
+		.set("docstatus", 1)
+		.from_(ss)
+		.where(
+			(ss.docstatus == 1) &
+			(sd.parenttype == "Salary Structure") &
+			(ss.name == sd.parent)
+		)
 	).run()
