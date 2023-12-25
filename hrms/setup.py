@@ -653,7 +653,7 @@ def get_post_install_patches():
 		"erpnext.patches.v12_0.remove_duplicate_leave_ledger_entries",
 		"erpnext.patches.v12_0.move_due_advance_amount_to_pending_amount",
 		"erpnext.patches.v13_0.move_doctype_reports_and_notification_from_hr_to_payroll",
-		"erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings",
+		# "erpnext.patches.v13_0.move_payroll_setting_separately_from_hr_settings",
 		"erpnext.patches.v13_0.update_start_end_date_for_old_shift_assignment",
 		"erpnext.patches.v13_0.updates_for_multi_currency_payroll",
 		"erpnext.patches.v13_0.update_reason_for_resignation_in_employee",

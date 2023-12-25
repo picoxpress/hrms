@@ -10,7 +10,7 @@ def execute():
 		.set(advance.status, "Returned")
 		.where(
 			(advance.docstatus == 1)
-			& ((advance.return_amount) & (advance.paid_amount == advance.return_amount))
+			& ((advance.return_amount.isnotnull()) & (advance.paid_amount == advance.return_amount))
 			& (advance.status == "Paid")
 		)
 	).run()
@@ -21,7 +21,7 @@ def execute():
 		.where(
 			(advance.docstatus == 1)
 			& (
-				(advance.claimed_amount & advance.return_amount)
+				(advance.claimed_amount.isnotnull() & advance.return_amount.isnotnull())
 				& (advance.paid_amount == (advance.return_amount + advance.claimed_amount))
 			)
 			& (advance.status == "Paid")
