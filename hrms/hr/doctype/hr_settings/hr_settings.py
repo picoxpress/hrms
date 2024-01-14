@@ -13,7 +13,7 @@ PROCEED_WITH_FREQUENCY_CHANGE = False
 
 class HRSettings(Document):
 	def validate(self):
-		self.set_naming_series()
+		# self.set_naming_series()
 
 		# Based on proceed flag
 		global PROCEED_WITH_FREQUENCY_CHANGE
