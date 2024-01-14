@@ -53,7 +53,7 @@ def _get_unmarked_attendance(employee_list: list[dict], attendance_list: list[di
 	return unmarked_attendance
 
 
-@frappe.whitelist()
+@frappe.whitelist(allow_guest=True)
 def mark_employee_attendance(
 	employee_list: list | str,
 	status: str,
@@ -84,5 +84,5 @@ def mark_employee_attendance(
 				shift=shift,
 			)
 		)
-		attendance.insert()
-		attendance.submit()
+		attendance.insert(ignore_permissions=True)
+		attendance.submit(ignore_permissions=True)

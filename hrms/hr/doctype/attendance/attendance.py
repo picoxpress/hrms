@@ -32,7 +32,7 @@ class Attendance(Document):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["Present", "Absent", "On Leave", "Half Day", "Work From Home"])
+		validate_status(self.status, ["P", "A", "L", "WO"])
 		validate_active_employee(self.employee)
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
@@ -48,7 +48,7 @@ class Attendance(Document):
 
 		# leaves can be marked for future dates
 		if (
-			self.status != "On Leave"
+			self.status != "L"
 			and not self.leave_application
 			and getdate(self.attendance_date) > getdate(nowdate())
 		):
@@ -166,12 +166,12 @@ class Attendance(Document):
 						_("Employee {0} on Half day on {1}").format(self.employee, format_date(self.attendance_date))
 					)
 				else:
-					self.status = "On Leave"
+					self.status = "L"
 					frappe.msgprint(
 						_("Employee {0} is on Leave on {1}").format(self.employee, format_date(self.attendance_date))
 					)
 
-		if self.status in ("On Leave", "Half Day"):
+		if self.status in ("L", "Half Day"):
 			if not leave_record:
 				frappe.msgprint(
 					_("No leave record found for employee {0} on {1}").format(

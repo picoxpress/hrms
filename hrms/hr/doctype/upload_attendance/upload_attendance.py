@@ -20,9 +20,9 @@ class UploadAttendance(Document):
 
 
 @frappe.whitelist()
-def get_template():
-	if not frappe.has_permission("Attendance", "create"):
-		raise frappe.PermissionError
+def get_template(allow_guest=True):
+	# if not frappe.has_permission("Attendance", "create"):
+	# 	raise frappe.PermissionError
 
 	args = frappe.local.form_dict
 
@@ -54,7 +54,7 @@ def add_header(w):
 	w.writerow(["Status should be one of these values: " + status])
 	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
 	w.writerow(
-		["ID", "Employee", "Employee Name", "Date", "Status", "Leave Type", "Company", "Naming Series"]
+		["ID", "Employee", "Employee Name", "Date Of Joining", "Date", "Status"]
 	)
 	return w
 
@@ -67,7 +67,7 @@ def add_data(w, args):
 
 def get_data(args):
 	dates = get_dates(args)
-	employees = get_active_employees()
+	employees = get_active_employees(args)
 	holidays = get_holidays_for_employees(
 		[employee.name for employee in employees], args["from_date"], args["to_date"]
 	)
@@ -95,14 +95,12 @@ def get_data(args):
 				existing_attendance and existing_attendance.name or "",
 				employee.name,
 				employee.employee_name,
+				employee.date_of_joining,
 				date,
-				existing_attendance and existing_attendance.status or "",
-				existing_attendance and existing_attendance.leave_type or "",
-				employee.company,
-				existing_attendance and existing_attendance.naming_series or get_naming_series(),
+				existing_attendance and existing_attendance.status or ""
 			]
 			if date in holidays[employee_holiday_list]:
-				row[4] = "Holiday"
+				row[4] = "H"
 			data.append(row)
 
 	return data
@@ -131,11 +129,17 @@ def get_dates(args):
 	return dates
 
 
-def get_active_employees():
+def get_active_employees(args):
+	filters = {
+		"docstatus": ["<", 2],
+		"status": "Active"
+	}
+	if args.hub:
+		filters["assigned_hub"] = args.hub
 	employees = frappe.db.get_all(
 		"Employee",
 		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date"],
-		filters={"docstatus": ["<", 2], "status": "Active"},
+		filters=filters,
 	)
 	return employees
 
@@ -177,7 +181,7 @@ def upload():
 
 def import_attendances(rows):
 	def remove_holidays(rows):
-		rows = [row for row in rows if row[4] != "Holiday"]
+		rows = [row for row in rows if row[4] != "H"]
 		return rows
 
 	from frappe.modules import scrub

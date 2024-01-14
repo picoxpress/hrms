@@ -112,9 +112,9 @@ def get_timeline_data(doctype, name):
 	timeline_data = dict(
 		frappe.db.sql(
 			"""
-			select unix_timestamp(attendance_date), count(*)
+			select EXTRACT(EPOCH FROM attendance_date)::integer, count(*)
 			from `tabAttendance` where employee=%s
-			and attendance_date > date_sub(curdate(), interval 1 year)
+			and attendance_date > CURRENT_DATE - INTERVAL '1 year'
 			and status in ('Present', 'Half Day')
 			group by attendance_date""",
 			name,
