@@ -19,8 +19,8 @@ class UploadAttendance(Document):
 	pass
 
 
-@frappe.whitelist()
-def get_template(allow_guest=True):
+@frappe.whitelist(allow_guest=True)
+def get_template():
 	# if not frappe.has_permission("Attendance", "create"):
 	# 	raise frappe.PermissionError
 
