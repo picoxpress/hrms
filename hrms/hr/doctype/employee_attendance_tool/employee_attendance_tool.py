@@ -85,4 +85,4 @@ def mark_employee_attendance(
 			)
 		)
 		attendance.insert(ignore_permissions=True)
-		attendance.submit(ignore_permissions=True)
+		attendance.submit()
