@@ -30,10 +30,10 @@ def get_template():
 		frappe.throw(_("To Date should be greater than From Date"))
 
 	w = UnicodeWriter()
-	w = add_header(w)
+	w = add_header_lenear(w, args)
 
 	try:
-		w = add_data(w, args)
+		w = add_data_lenear(w, args)
 	except Exception as e:
 		frappe.clear_messages()
 		frappe.respond_as_web_page("Holiday List Missing", html=e)
@@ -58,12 +58,30 @@ def add_header(w):
 	)
 	return w
 
+def add_header_lenear(w, args):
+	dates = get_dates(args)
+	status = ", ".join(
+		(frappe.get_meta("Attendance").get_field("status").options or "").strip().split("\n")
+	)
+	w.writerow(["Notes:"])
+	w.writerow(["Please do not change the template headings"])
+	w.writerow(["Status should be one of these values: " + status])
+	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
+	row = ["Employee", "Employee Name", "Date Of Joining"]
+	for date in dates:
+		row.append(date)
+	w.writerow(row)
+	return w
 
 def add_data(w, args):
 	data = get_data(args)
 	writedata(w, data)
 	return w
 
+def add_data_lenear(w, args):
+	data = get_data_lenear(args)
+	writedata(w, data)
+	return w
 
 def get_data(args):
 	dates = get_dates(args)
@@ -82,10 +100,10 @@ def get_data(args):
 					continue
 			existing_attendance = {}
 			if (
-				existing_attendance_records
-				and tuple([getdate(date), employee.name]) in existing_attendance_records
-				and getdate(employee.date_of_joining) <= getdate(date)
-				and getdate(employee.relieving_date) >= getdate(date)
+					existing_attendance_records
+					and tuple([getdate(date), employee.name]) in existing_attendance_records
+					and getdate(employee.date_of_joining) <= getdate(date)
+					and getdate(employee.relieving_date) >= getdate(date)
 			):
 				existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
 
@@ -102,6 +120,46 @@ def get_data(args):
 			if date in holidays[employee_holiday_list]:
 				row[4] = "H"
 			data.append(row)
+
+	return data
+
+def get_data_lenear(args):
+	dates = get_dates(args)
+	employees = get_active_employees(args)
+	holidays = get_holidays_for_employees(
+		[employee.name for employee in employees], args["from_date"], args["to_date"]
+	)
+	existing_attendance_records = get_existing_attendance_records(args)
+	data = []
+	for employee in employees:
+		row = [
+			employee.name,
+			employee.employee_name,
+			employee.date_of_joining,
+		]
+		for date in dates:
+			if getdate(date) < getdate(employee.date_of_joining):
+				continue
+			if employee.relieving_date:
+				if getdate(date) > getdate(employee.relieving_date):
+					continue
+			existing_attendance = {}
+			if (
+					existing_attendance_records
+					and tuple([getdate(date), employee.name]) in existing_attendance_records
+					and getdate(employee.date_of_joining) <= getdate(date)
+					and getdate(employee.relieving_date) >= getdate(date)
+			):
+				existing_attendance = existing_attendance_records[tuple([getdate(date), employee.name])]
+
+			employee_holiday_list = get_holiday_list_for_employee(employee.name)
+			if date in holidays[employee_holiday_list]:
+				row.append('H')
+			else:
+				row.append(
+					existing_attendance and existing_attendance.status or ""
+				)
+		data.append(row)
 
 	return data
 
