@@ -348,3 +348,49 @@ def get_unmarked_days(employee, from_date, to_date, exclude_holidays=0):
 		from_date = add_days(from_date, 1)
 
 	return unmarked_days
+
+@frappe.whitelist(allow_guest=True)
+def send_unmarked_attendance_summary(attendace_date):
+	hr_settings = frappe.get_doc("HR Settings")
+	hubs = frappe.get_all(
+		"Hub Location",
+		fields=["manager_email", "name"]
+	)
+	for h in hubs:
+		off_role_employees = frappe.get_all(
+			"Employee",
+			fields=["employee_name", "name"],
+			filters=[
+				["assigned_hub", "=", h.name],
+				["employment_type", "=", "Off-Roll"],
+				["status", "=", "Active"]
+			]
+		)
+		if len(off_role_employees) > 0:
+			missed_attendance_employee = []
+			for e in off_role_employees:
+				attendance_record = frappe.get_all(
+					"Attendance",
+					fields=["attendance_date", "employee"],
+					filters=[
+						["attendance_date", "=", getdate(attendace_date)],
+						["employee", "=", e.name],
+						["docstatus", "!=", 2],
+					],
+				)
+				if len(attendance_record) == 0:
+					missed_attendance_employee.append(
+						{
+							"name": e.employee_name,
+						}
+					)
+			if len(missed_attendance_employee) > int((hr_settings.minimum_off_role_count_for_attendance_alert or 10)) and h.manager_email:
+				frappe.sendmail(
+					recipients=[h.manager_email],
+					subject=_("Missing Attendance for Hub: {} on: {}".format(h.name, attendace_date)),
+					template="missing_offrole_attendance_summary",
+					args=dict(
+						title="Attendance was not marked for the below employees at: {} on {}".format(h.name, attendace_date),
+						missing_attendance=missed_attendance_employee
+					),
+				)

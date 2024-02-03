@@ -44,7 +44,9 @@
   "employee_exit_section",
   "exit_questionnaire_web_form",
   "column_break_34",
-  "exit_questionnaire_notification_template"
+  "exit_questionnaire_notification_template",
+  "attendance_config_section",
+  "minimum_off_role_count_for_attendance_alert"
  ],
  "fields": [
   {
@@ -280,13 +282,24 @@
    "fieldname": "shift_settings_section",
    "fieldtype": "Section Break",
    "label": "Shift Settings"
+  },
+  {
+   "fieldname": "attendance_config_section",
+   "fieldtype": "Section Break",
+   "label": "Attendance Config"
+  },
+  {
+   "default": "10",
+   "fieldname": "minimum_off_role_count_for_attendance_alert",
+   "fieldtype": "Data",
+   "label": "Minimum Off Role Count For Attendance Alert"
   }
  ],
  "icon": "fa fa-cog",
  "idx": 1,
  "issingle": 1,
  "links": [],
- "modified": "2023-12-07 14:55:37.309553",
+ "modified": "2024-02-03 15:10:02.934732",
  "modified_by": "Administrator",
  "module": "HR",
  "name": "HR Settings",
