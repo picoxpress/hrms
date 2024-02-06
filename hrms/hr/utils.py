@@ -674,7 +674,7 @@ def validate_active_employee(employee, method=None):
 	if isinstance(employee, (dict, Document)):
 		employee = employee.get("employee")
 
-	if employee and frappe.db.get_value("Employee", employee, "status") == "Inactive":
+	if employee and frappe.db.get_value("Employee", employee, "status") != "Active":
 		frappe.throw(
 			_("Transactions cannot be created for an Inactive Employee {0}.").format(
 				get_link_to_form("Employee", employee)
