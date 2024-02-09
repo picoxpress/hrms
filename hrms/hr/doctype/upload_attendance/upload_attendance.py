@@ -193,7 +193,8 @@ def get_active_employees(args):
 		"status": "Active"
 	}
 	if args.hub:
-		filters["assigned_hub"] = args.hub
+		filters["location_type"] = 'Hub Location'
+		filters["location"] = args.hub
 	employees = frappe.db.get_all(
 		"Employee",
 		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date"],
