@@ -169,7 +169,7 @@ class Attendance(Document):
 
 	def get_first_and_last_day_of_month(self, date_str):
 		# Parse the input date string
-		input_date = datetime.strptime(date_str, '%Y-%m-%d')
+		input_date = datetime.strptime(date_str, '%Y-%m-%d') if not isinstance(date_str, datetime) else date_str
 
 		# Get the year and month
 		year = input_date.year
