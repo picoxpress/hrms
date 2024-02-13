@@ -4,6 +4,7 @@
 
 import frappe
 from frappe import _
+from datetime import datetime, timedelta
 from frappe.model.document import Document
 from frappe.utils import (
 	add_days,
@@ -15,6 +16,7 @@ from frappe.utils import (
 	getdate,
 	nowdate,
 )
+import moment
 
 from hrms.hr.doctype.shift_assignment.shift_assignment import has_overlapping_timings
 from hrms.hr.utils import get_holiday_dates_for_employee, validate_active_employee
@@ -27,6 +29,12 @@ class DuplicateAttendanceError(frappe.ValidationError):
 class OverlappingShiftAttendanceError(frappe.ValidationError):
 	pass
 
+class SingleLeavePerMonth(frappe.ValidationError):
+	pass
+
+class SingleWOPeWeek(frappe.ValidationError):
+	pass
+
 
 class Attendance(Document):
 	def validate(self):
@@ -35,9 +43,11 @@ class Attendance(Document):
 		validate_status(self.status, ["P", "A", "L", "WO"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
-		self.validate_overlapping_shift_attendance()
+		# self.validate_overlapping_shift_attendance()
 		self.validate_employee_status()
-		self.check_leave_record()
+		# self.check_leave_record()
+		self.check_leave_record_for_current_month()
+		self.check_wo_record_for_current_week()
 
 	def on_cancel(self):
 		self.unlink_attendance_from_checkins()
@@ -104,6 +114,93 @@ class Attendance(Document):
 
 		return duplicate[0] if duplicate else None
 
+	def check_leave_record_for_current_month(self):
+		if self.status == 'L':
+			Attendance = frappe.qb.DocType("Attendance")
+			month_first_day, month_last_day = self.get_first_and_last_day_of_month(self.attendance_date)
+			query = (
+				frappe.qb.from_(Attendance)
+				.select(Attendance.name)
+				.where(
+					(Attendance.employee == self.employee)
+					& (Attendance.docstatus < 2)
+					& (Attendance.attendance_date >= month_first_day)
+					& (Attendance.attendance_date <= month_last_day)
+					& (Attendance.name != self.name)
+					& (Attendance.status == 'L')
+				)
+			)
+
+			duplicate = query.run(pluck=True)
+			if duplicate:
+				frappe.throw(
+					_("Attendance for employee {0} is already marked for Leave this Month").format(
+						frappe.bold(self.employee)
+					),
+					title=_("Only Single Leave Per Month"),
+					exc=SingleLeavePerMonth,
+				)
+
+	def check_wo_record_for_current_week(self):
+		if self.status == 'WO':
+			Attendance = frappe.qb.DocType("Attendance")
+			week_first_day, week_last_day = self.get_first_and_last_day_of_week(self.attendance_date)
+			query = (
+				frappe.qb.from_(Attendance)
+				.select(Attendance.name)
+				.where(
+					(Attendance.employee == self.employee)
+					& (Attendance.docstatus < 2)
+					& (Attendance.attendance_date >= week_first_day)
+					& (Attendance.attendance_date <= week_last_day)
+					& (Attendance.name != self.name)
+					& (Attendance.status == 'WO')
+				)
+			)
+
+			duplicate = query.run(pluck=True)
+			if duplicate:
+				frappe.throw(
+					_("Attendance for employee {0} is already marked for WO this Week").format(
+						frappe.bold(self.employee)
+					),
+					title=_("Only Single Week Off Per Week"),
+					exc=SingleWOPeWeek,
+				)
+
+	def get_first_and_last_day_of_month(self, date_str):
+		# Parse the input date string
+		input_date = datetime.strptime(date_str, '%Y-%m-%d')
+
+		# Get the year and month
+		year = input_date.year
+		month = input_date.month
+
+		# Get the first day of the month
+		first_day = datetime(year, month, 1).strftime('%m-%d-%Y')
+
+		# Get the last day of the month
+		last_day = datetime(year, month + 1, 1) - timedelta(days=1)
+		last_day = last_day.strftime('%m-%d-%Y')
+
+		return first_day, last_day
+
+	def get_first_and_last_day_of_week(self, date_str):
+		# Parse the input date string
+		input_date = datetime.strptime(date_str, '%Y-%m-%d')
+
+		# Calculate the start of the week (Sunday)
+		start_of_week = input_date - timedelta(days=input_date.weekday())
+
+		# Calculate the end of the week (Saturday)
+		end_of_week = start_of_week + timedelta(days=6)
+
+		# Format the dates in mm-dd-yyyy format
+		start_of_week_str = start_of_week.strftime('%m-%d-%Y')
+		end_of_week_str = end_of_week.strftime('%m-%d-%Y')
+
+		return start_of_week_str, end_of_week_str
+
 	def validate_overlapping_shift_attendance(self):
 		attendance = self.get_overlapping_shift_attendance()
 
@@ -117,6 +214,7 @@ class Attendance(Document):
 				title=_("Overlapping Shift Attendance"),
 				exc=OverlappingShiftAttendanceError,
 			)
+
 
 	def get_overlapping_shift_attendance(self) -> dict:
 		if not self.shift:
