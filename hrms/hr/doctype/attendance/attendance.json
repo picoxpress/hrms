@@ -89,7 +89,7 @@
    "no_copy": 1,
    "oldfieldname": "status",
    "oldfieldtype": "Select",
-   "options": "\nP\nA\nL\nWO",
+   "options": "\nP\nA\nL\nWO\nGH",
    "reqd": 1,
    "search_index": 1
   },

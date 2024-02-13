@@ -39,7 +39,7 @@ class Attendance(Document):
 	def validate(self):
 		from erpnext.controllers.status_updater import validate_status
 
-		validate_status(self.status, ["P", "A", "L", "WO"])
+		validate_status(self.status, ["P", "A", "L", "WO", "GH"])
 		self.validate_attendance_date()
 		self.validate_duplicate_record()
 		# self.validate_overlapping_shift_attendance()
