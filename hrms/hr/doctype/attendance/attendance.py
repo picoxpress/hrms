@@ -469,7 +469,7 @@ def send_unmarked_attendance_summary(attendace_date):
 					"Attendance",
 					fields=["attendance_date", "employee"],
 					filters=[
-						["attendance_date", "=", getdate(attendace_date)],
+						["attendance_date", "=", getdate(attendace_date) - timedelta(days=1)],
 						["employee", "=", e.name],
 						["docstatus", "!=", 2],
 					],
