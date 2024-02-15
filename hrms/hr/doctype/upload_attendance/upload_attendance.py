@@ -196,7 +196,7 @@ def get_active_employees(args):
 	if args.hub:
 		hubs_filter.append(args.hub)
 	if args.hubs:
-		hubs_filter.append(args.hubs.split(","))
+		hubs_filter = [h.strip() for h in args.hubs.split(",")]
 	if len(hubs_filter) > 0:
 		filters["location_type"] = 'Hub Location'
 		filters["location"] = ["in", hubs_filter]
