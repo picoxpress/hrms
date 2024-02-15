@@ -63,6 +63,7 @@ def mark_employee_attendance(
 	late_entry: int = None,
 	early_exit: int = None,
 	shift: str = None,
+	submitted_by: str = None
 ) -> None:
 	if isinstance(employee_list, str):
 		employee_list = json.loads(employee_list)
@@ -82,6 +83,7 @@ def mark_employee_attendance(
 				late_entry=late_entry,
 				early_exit=early_exit,
 				shift=shift,
+				submitted_by=submitted_by
 			)
 		)
 		attendance.insert(ignore_permissions=True)
