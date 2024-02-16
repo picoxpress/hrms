@@ -52,7 +52,6 @@ def add_header(w):
 	w.writerow(["Notes:"])
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
-	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
 	w.writerow(
 		["ID", "Employee", "Employee Name", "Date Of Joining", "Date", "Status"]
 	)
@@ -66,8 +65,7 @@ def add_header_lenear(w, args):
 	w.writerow(["Notes:"])
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
-	w.writerow(["If you are overwriting existing attendance records, 'ID' column mandatory"])
-	row = ["Employee", "Employee Name", "Date Of Joining"]
+	row = ["Employee", "Employee Name", "Location", "Date Of Joining"]
 	for date in dates:
 		row.append(date)
 	w.writerow(row)
