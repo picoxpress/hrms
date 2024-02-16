@@ -177,6 +177,11 @@ doc_events = {
 # ---------------
 
 scheduler_events = {
+	"cron": {
+		"0 9 * * *": [
+			"hrms.hr.doctype.attendance.attendance.send_unmarked_attendance_summary"
+		]
+	},
 	"all": [
 		"hrms.hr.doctype.interview.interview.send_interview_reminder",
 	],
