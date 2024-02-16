@@ -135,6 +135,7 @@ def get_data_lenear(args):
 		row = [
 			employee.name,
 			employee.employee_name,
+			employee.location,
 			employee.date_of_joining,
 		]
 		for date in dates:
@@ -202,7 +203,7 @@ def get_active_employees(args):
 		filters["location"] = ["in", hubs_filter]
 	employees = frappe.db.get_all(
 		"Employee",
-		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date"],
+		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date", "location"],
 		filters=filters,
 	)
 	return employees
