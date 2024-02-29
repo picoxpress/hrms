@@ -142,9 +142,11 @@ def get_data_lenear(args):
 			row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
 		for date in dates:
 			if getdate(date) < getdate(employee.date_of_joining):
+				row.append("N/A")
 				continue
 			if employee.relieving_date:
 				if getdate(date) > getdate(employee.relieving_date):
+					row.append("N/A")
 					continue
 			existing_attendance = {}
 			if (
