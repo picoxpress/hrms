@@ -114,7 +114,9 @@ class Attendance(Document):
 		return duplicate[0] if duplicate else None
 
 	def check_leave_record_for_current_month(self):
-		if self.status == 'L':
+		target_date = datetime(2024, 2, 15).date()
+		input_date = datetime.strptime(self.attendance_date, '%Y-%m-%d') if not isinstance(self.attendance_date, date) else self.attendance_date
+		if self.status == 'L' and input_date > target_date:
 			Attendance = frappe.qb.DocType("Attendance")
 			month_first_day, month_last_day = self.get_first_and_last_day_of_month(self.attendance_date)
 			query = (
@@ -141,7 +143,9 @@ class Attendance(Document):
 				)
 
 	def check_wo_record_for_current_week(self):
-		if self.status == 'WO':
+		target_date = datetime(2024, 2, 15).date()
+		input_date = datetime.strptime(self.attendance_date, '%Y-%m-%d') if not isinstance(self.attendance_date, date) else self.attendance_date
+		if self.status == 'WO' and input_date > target_date:
 			Attendance = frappe.qb.DocType("Attendance")
 			week_first_day, week_last_day = self.get_first_and_last_day_of_week(self.attendance_date)
 			query = (
