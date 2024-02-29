@@ -193,7 +193,7 @@ def get_dates(args):
 def get_active_employees(args):
 	filters = {
 		"docstatus": ["<", 2],
-		"status": "Active" if args.include_terminated else ["in", ["Active", "Terminated"]]
+		"status": "Active" if not args.include_terminated else ["in", ["Active", "Terminated"]]
 	}
 	hubs_filter = []
 	if args.hub:
