@@ -66,7 +66,7 @@ def add_header_lenear(w, args):
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
 	row = ["Employee", "Employee Name", "Location", "Date Of Joining"]
-	if (args.include_terminated):
+	if args.include_terminated and args.include_terminated == 'true':
 		row.append("Date of Termination")
 	for date in dates:
 		row.append(date)
@@ -138,7 +138,7 @@ def get_data_lenear(args):
 			employee.location,
 			employee.date_of_joining,
 		]
-		if (args.include_terminated):
+		if args.include_terminated and args.include_terminated == 'true':
 			row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
 		for date in dates:
 			if getdate(date) < getdate(employee.date_of_joining):
@@ -193,7 +193,7 @@ def get_dates(args):
 def get_active_employees(args):
 	filters = {
 		"docstatus": ["<", 2],
-		"status": "Active" if not args.include_terminated else ["in", ["Active", "Terminated"]]
+		"status": ["in", ["Active", "Terminated"]] if args.include_terminated and args.include_terminated == 'true' else "Active"
 	}
 	hubs_filter = []
 	if args.hub:
