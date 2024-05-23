@@ -66,8 +66,7 @@ def add_header_lenear(w, args):
 	w.writerow(["Please do not change the template headings"])
 	w.writerow(["Status should be one of these values: " + status])
 	row = ["Employee", "Employee Name", "Location", "Date Of Joining"]
-	if args.include_terminated and args.include_terminated == 'true':
-		row.append("Date of Termination")
+	row.append("Date of Termination")
 	for date in dates:
 		row.append(date)
 	w.writerow(row)
@@ -136,10 +135,9 @@ def get_data_lenear(args):
 			employee.name,
 			employee.employee_name,
 			employee.location,
-			employee.date_of_joining,
+			employee.date_of_joining
 		]
-		if args.include_terminated and args.include_terminated == 'true':
-			row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
+		row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
 		for date in dates:
 			if getdate(date) < getdate(employee.date_of_joining):
 				row.append("N/A")
@@ -191,11 +189,18 @@ def get_dates(args):
 	dates = [add_days(args["from_date"], i) for i in range(0, no_of_days)]
 	return dates
 
+def is_within_range(e, from_date, to_date) -> bool:
+	if e.status == 'Active':
+		return True
+	elif e.relieving_date:
+		return e.relieving_date.month == from_date.month or e.relieving_date.month == to_date.month
+	else:
+		return False
 
 def get_active_employees(args):
 	filters = {
 		"docstatus": ["<", 2],
-		"status": ["in", ["Active", "Terminated"]] if args.include_terminated and args.include_terminated == 'true' else "Active"
+		"status": ["in", ["Active", "Terminated"]]
 	}
 	hubs_filter = []
 	if args.hub:
@@ -210,7 +215,7 @@ def get_active_employees(args):
 		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date", "location", "status"],
 		filters=filters,
 	)
-	return employees
+	return [e for e in employees if is_within_range(e, getdate(args.from_date), getdate(args.to_date))]
 
 
 def get_existing_attendance_records(args):

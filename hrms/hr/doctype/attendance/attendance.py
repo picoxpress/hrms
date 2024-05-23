@@ -241,9 +241,13 @@ class Attendance(Document):
 		return {}
 
 	def validate_employee_status(self):
-		target_date = datetime(2024, 2, 15).date()
 		input_date = datetime.strptime(self.attendance_date, '%Y-%m-%d') if not isinstance(self.attendance_date, date) else self.attendance_date
-		if frappe.db.get_value("Employee", self.employee, "status") != "Active" and input_date > target_date:
+		termination_date = frappe.db.get_value("Employee", self.employee, "relieving_date")
+		print(type(input_date))
+		print(type(termination_date))
+		if (frappe.db.get_value("Employee", self.employee, "status") != "Active"
+				and termination_date < input_date.date()
+		):
 			frappe.throw(_("Cannot mark attendance for an Inactive employee {0}").format(self.employee))
 
 	def check_leave_record(self):
