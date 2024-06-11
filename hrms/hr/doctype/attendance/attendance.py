@@ -53,6 +53,8 @@ class Attendance(Document):
 
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
+		current_attendance_date = getdate(self.attendance_date)
+		min_valid_date = getdate(nowdate()) - timedelta(days=3)
 
 		# leaves can be marked for future dates
 		if (
@@ -63,6 +65,13 @@ class Attendance(Document):
 			frappe.throw(
 				_("Attendance can not be marked for future dates: {0}").format(
 					frappe.bold(format_date(self.attendance_date)),
+				)
+			)
+		elif current_attendance_date < min_valid_date:
+			frappe.throw(
+				_("Attendance date {0} can not be less than {1}, which is 3 days from today, please reach out to HR").format(
+					frappe.bold(format_date(self.attendance_date)),
+					frappe.bold(format_date(min_valid_date)),
 				)
 			)
 		elif date_of_joining and getdate(self.attendance_date) < getdate(date_of_joining):
