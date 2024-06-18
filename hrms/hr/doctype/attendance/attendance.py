@@ -51,15 +51,18 @@ class Attendance(Document):
 	def on_cancel(self):
 		self.unlink_attendance_from_checkins()
 
+	def has_override(self):
+		current_roles = frappe.get_roles(frappe.session.user)
+		submitted_by = self.submitted_by
+
+		return 'HR Manager' in current_roles or submitted_by in ['hardik@picoxpress.com', 'prathap.n@picoxpress.com']
+
 	def validate_attendance_date(self):
 		date_of_joining = frappe.db.get_value("Employee", self.employee, "date_of_joining")
 		current_attendance_date = getdate(self.attendance_date)
 		min_valid_date = getdate(nowdate()) - timedelta(days=3)
 
-		current_roles = frappe.get_roles(frappe.session.user)
-		submitted_by = self.submitted_by
-
-		skip_min_validation_check = 'HR Manager' in current_roles or submitted_by in ['hardik@picoxpress.com', 'prathap.n@picoxpress.com']
+		skip_min_validation_check = self.has_override()
 
 		# leaves can be marked for future dates
 		if (
@@ -147,7 +150,7 @@ class Attendance(Document):
 			)
 
 			duplicate = query.run(pluck=True)
-			if duplicate:
+			if duplicate and not self.has_override():
 				frappe.throw(
 					_("Attendance for employee {0} is already marked for Leave this Month").format(
 						frappe.bold(self.employee)
@@ -176,7 +179,7 @@ class Attendance(Document):
 			)
 
 			duplicate = query.run(pluck=True)
-			if duplicate:
+			if duplicate and not self.has_override():
 				frappe.throw(
 					_("Attendance for employee {0} is already marked for WO this Week").format(
 						frappe.bold(self.employee)
