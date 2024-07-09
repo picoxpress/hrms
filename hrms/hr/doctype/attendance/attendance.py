@@ -260,8 +260,7 @@ class Attendance(Document):
 	def validate_employee_status(self):
 		input_date = datetime.strptime(self.attendance_date, '%Y-%m-%d') if not isinstance(self.attendance_date, date) else self.attendance_date
 		termination_date = frappe.db.get_value("Employee", self.employee, "relieving_date")
-		print(type(input_date))
-		print(type(termination_date))
+
 		if (frappe.db.get_value("Employee", self.employee, "status") != "Active"
 				and termination_date < input_date.date()
 		):
@@ -480,7 +479,6 @@ def send_unmarked_attendance_summary():
 		"Hub Location",
 		fields=["manager_email", "name"]
 	)
-	print("Hub List", hubs)
 	for h in hubs:
 		off_role_employees = frappe.get_all(
 			"Employee",
@@ -492,7 +490,6 @@ def send_unmarked_attendance_summary():
 			]
 		)
 		if len(off_role_employees) > 0:
-			print("Employees for Hubs", h.name, off_role_employees)
 			missed_attendance_employee = []
 			for e in off_role_employees:
 				attendance_record = frappe.get_all(
@@ -514,6 +511,7 @@ def send_unmarked_attendance_summary():
 				print("Sending Email for Hub: {} and date: {} and Employees Missing: {}".format(h.name, attendance_date.strftime("%d-%m-%Y"), missed_attendance_employee))
 				frappe.sendmail(
 					recipients=[h.manager_email],
+					cc=["prathap.n@picoxpress.com"],
 					subject=_("Missing Attendance for Hub: {} on: {}".format(h.name, attendance_date.strftime("%d-%m-%Y"))),
 					template="missing_offrole_attendance_summary",
 					args=dict(

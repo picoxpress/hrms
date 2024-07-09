@@ -135,7 +135,8 @@ def get_data_lenear(args):
 			employee.name,
 			employee.employee_name,
 			employee.location,
-			employee.date_of_joining
+			employee.date_of_joining,
+			employee.off_roll_vendor,
 		]
 		row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
 		for date in dates:
