@@ -67,6 +67,7 @@ def add_header_lenear(w, args):
 	w.writerow(["Status should be one of these values: " + status])
 	row = ["Employee", "Employee Name", "Location", "Date Of Joining"]
 	row.append("Date of Termination")
+	row.append("Vendor")
 	for date in dates:
 		row.append(date)
 	w.writerow(row)
@@ -135,10 +136,10 @@ def get_data_lenear(args):
 			employee.name,
 			employee.employee_name,
 			employee.location,
-			employee.date_of_joining,
-			employee.off_roll_vendor,
+			employee.date_of_joining
 		]
 		row.append(employee.relieving_date if employee.status == 'Terminated' else 'N/A')
+		row.append(employee.off_roll_vendor)
 		for date in dates:
 			if getdate(date) < getdate(employee.date_of_joining):
 				row.append("N/A")
@@ -213,7 +214,7 @@ def get_active_employees(args):
 		filters["location"] = ["in", hubs_filter]
 	employees = frappe.db.get_all(
 		"Employee",
-		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date", "location", "status"],
+		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date", "location", "status", "off_roll_vendor"],
 		filters=filters,
 	)
 	return [e for e in employees if is_within_range(e, getdate(args.from_date), getdate(args.to_date))]
