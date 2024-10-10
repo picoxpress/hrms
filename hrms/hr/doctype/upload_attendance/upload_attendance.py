@@ -205,13 +205,24 @@ def get_active_employees(args):
 		"status": ["in", ["Active", "Terminated"]]
 	}
 	hubs_filter = []
+	location_types = []
+	locations = []
 	if args.hub:
 		hubs_filter.append(args.hub)
 	if args.hubs:
 		hubs_filter = [h.strip() for h in args.hubs.split(",")]
-	if len(hubs_filter) > 0:
-		filters["location_type"] = 'Hub Location'
-		filters["location"] = ["in", hubs_filter]
+	if args.include_central:
+		location_types.append("Central Location")
+		locations.append("Bengaluru Corporate Office - HSR")
+	if hubs_filter:
+		location_types.append("Hub Location")
+		locations.extend(hubs_filter)
+
+	if location_types:
+		filters["location_type"] = ["in", location_types]
+	if locations:
+		filters["location"] = ["in", locations]	
+
 	employees = frappe.db.get_all(
 		"Employee",
 		fields=["name", "employee_name", "date_of_joining", "company", "relieving_date", "location", "status", "off_roll_vendor"],
