@@ -200,7 +200,10 @@ class Attendance(Document):
 		first_day = datetime(year, month, 1).strftime('%m-%d-%Y')
 
 		# Get the last day of the month
-		last_day = datetime(year, month + 1, 1) - timedelta(days=1)
+		if month == 12:
+            last_day = date(year + 1, 1, 1) - timedelta(days=1)
+        else:
+            last_day = date(year, month + 1, 1) - timedelta(days=1)
 		last_day = last_day.strftime('%m-%d-%Y')
 
 		return first_day, last_day
